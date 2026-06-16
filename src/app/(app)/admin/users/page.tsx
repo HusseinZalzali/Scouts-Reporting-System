@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/session";
 import { getAllUsers } from "@/lib/queries";
 import { PageHeader } from "@/components/dashboard-shell";
 import { UserManager } from "@/components/user-manager";
+import { CreateGroup } from "@/components/create-group";
 
 export const metadata = { title: "إدارة المستخدمين" };
 
@@ -13,8 +14,9 @@ export default async function AdminUsersPage() {
     <>
       <PageHeader
         title="إدارة المستخدمين"
-        description="تعديل الأسماء وأسماء المستخدمين، تغيير كلمات المرور، وإعادة تسمية الأفواج."
+        description="إضافة أفواج جديدة، تعديل الأسماء وأسماء المستخدمين، تغيير كلمات المرور، وإعادة تسمية الأفواج."
       />
+      <CreateGroup />
       <UserManager
         users={users.map((u) => ({
           id: u.id,

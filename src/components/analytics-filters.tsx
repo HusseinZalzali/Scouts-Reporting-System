@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import { Button, Card, Field, Input } from "@/components/ui";
 
 export function AnalyticsFilters({
@@ -16,23 +16,31 @@ export function AnalyticsFilters({
   const [to, setTo] = useState(params.get("to") ?? "");
   const [groupId, setGroupId] = useState(params.get("groupId") ?? "");
 
-  function apply(e: React.FormEvent) {
-    e.preventDefault();
-    const sp = new URLSearchParams();
-    if (from) sp.set("from", from);
-    if (to) sp.set("to", to);
-    if (groupId) sp.set("groupId", groupId);
-    router.push(`/admin/analytics?${sp.toString()}`);
-  }
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    const handle = setTimeout(() => {
+      const sp = new URLSearchParams();
+      if (from) sp.set("from", from);
+      if (to) sp.set("to", to);
+      if (groupId) sp.set("groupId", groupId);
+      const qs = sp.toString();
+      router.push(qs ? `/admin/analytics?${qs}` : "/admin/analytics");
+    }, 350);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [from, to, groupId]);
 
   function reset() {
     setFrom(""); setTo(""); setGroupId("");
-    router.push("/admin/analytics");
   }
 
   return (
     <Card className="mb-6">
-      <form onSubmit={apply} className="space-y-4">
+      <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="من تاريخ" htmlFor="from">
             <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
@@ -50,16 +58,12 @@ export function AnalyticsFilters({
           </Field>
         </div>
         <div className="flex gap-2">
-          <Button type="submit">
-            <Search className="h-4 w-4" />
-            تطبيق
-          </Button>
           <Button type="button" variant="ghost" onClick={reset}>
             <X className="h-4 w-4" />
             إعادة تعيين
           </Button>
         </div>
-      </form>
+      </div>
     </Card>
   );
 }

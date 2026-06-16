@@ -36,6 +36,12 @@ export const renameGroupSchema = z.object({
   name: z.string().min(2, "اسم الفوج مطلوب").max(120),
 });
 
+export const createGroupSchema = z.object({
+  name: z.string().min(2, "اسم الفوج مطلوب").max(120),
+  username: usernameField,
+  password: z.string().min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل").max(128),
+});
+
 const attendance = z
   .coerce.number({ invalid_type_error: "يجب إدخال رقم" })
   .int("يجب أن يكون رقماً صحيحاً")

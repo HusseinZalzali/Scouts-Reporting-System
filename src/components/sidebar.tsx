@@ -50,9 +50,19 @@ export function Sidebar({
   const [open, setOpen] = useState(false);
   const nav = role === "ADMIN" ? ADMIN_NAV : GROUP_NAV;
 
-  const isActive = (href: string) =>
-    href === pathname || (href !== "/admin" && href !== "/dashboard" && pathname.startsWith(href + "/")) ||
-    (href === pathname);
+  // Pick the single best-matching nav item: exact match wins; otherwise the
+  // longest href that is a path-prefix of the current pathname. This prevents
+  // e.g. /reports highlighting while on /reports/new (where /reports/new wins).
+  const activeHref = (() => {
+    const exact = nav.find((i) => i.href === pathname);
+    if (exact) return exact.href;
+    const prefixed = nav
+      .filter((i) => pathname.startsWith(i.href + "/"))
+      .sort((a, b) => b.href.length - a.href.length);
+    return prefixed[0]?.href ?? null;
+  })();
+
+  const isActive = (href: string) => href === activeHref;
 
   const Nav = (
     <nav className="flex flex-1 flex-col gap-1">

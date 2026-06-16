@@ -20,5 +20,6 @@ Never commit secrets: `.env` is gitignored and must stay that way.
 - Stack: Next.js 15 (App Router) + TypeScript + Prisma + Auth.js + TailwindCSS, Supabase Postgres.
 - GitHub remote: https://github.com/HusseinZalzali/Scouts-Reporting-System (branch `main`).
 - Deploys to Vercel, region pinned to `iad1` (matches Supabase us-east-1) via `vercel.json`.
-- DB connection uses a resilient pooled string + a Prisma retry wrapper (`src/lib/prisma.ts`) for cold-pooler errors.
+- DB connection reads `POSTGRES_PRISMA_URL` (pooled) + `POSTGRES_URL_NON_POOLING` (direct) — the vars Vercel's Supabase integration injects; mapped locally in `.env`. A Prisma retry wrapper (`src/lib/prisma.ts`) handles cold-pooler errors.
+- Fonts: 29LT Adir self-hosted via `next/font/local` (OTFs in `src/fonts/`).
 - Seed accounts: admin `admin`, groups `group1`–`group4` (see `prisma/seed.ts`).

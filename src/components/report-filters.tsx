@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { Search, X, FileSpreadsheet, FileText } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { X, FileSpreadsheet, FileText } from "lucide-react";
 import { Button, Card, Field, Input } from "@/components/ui";
 
 export function ReportFilters({
@@ -29,14 +29,24 @@ export function ReportFilters({
     return sp.toString();
   }
 
-  function apply(e: React.FormEvent) {
-    e.preventDefault();
-    router.push(`/admin/reports?${buildQuery()}`);
-  }
+  // Apply filters on change (debounced so typing in text fields doesn't
+  // navigate on every keystroke). No "apply" button needed.
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    const handle = setTimeout(() => {
+      const qs = buildQuery();
+      router.push(qs ? `/admin/reports?${qs}` : "/admin/reports");
+    }, 350);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [from, to, groupId, location, q]);
 
   function reset() {
     setFrom(""); setTo(""); setGroupId(""); setLocation(""); setQ("");
-    router.push("/admin/reports");
   }
 
   const exportHref = (format: "excel" | "pdf") => {
@@ -47,7 +57,7 @@ export function ReportFilters({
 
   return (
     <Card className="mb-6">
-      <form onSubmit={apply} className="space-y-4">
+      <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="من تاريخ" htmlFor="from">
             <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
@@ -77,10 +87,6 @@ export function ReportFilters({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="submit">
-            <Search className="h-4 w-4" />
-            تطبيق
-          </Button>
           <Button type="button" variant="ghost" onClick={reset}>
             <X className="h-4 w-4" />
             إعادة تعيين
@@ -99,7 +105,7 @@ export function ReportFilters({
             </Button>
           </a>
         </div>
-      </form>
+      </div>
     </Card>
   );
 }

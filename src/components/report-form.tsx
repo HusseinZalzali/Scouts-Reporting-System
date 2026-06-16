@@ -65,6 +65,13 @@ export function ReportForm({
   const firstRender = useRef(true);
   const total = baraem + ashbal + kashafa + jawala + qada;
 
+  // Arabic weekday name for the selected date (e.g. "الأحد").
+  const weekday = reportDate
+    ? new Intl.DateTimeFormat("ar-EG", { weekday: "long", timeZone: "UTC" }).format(
+        new Date(`${reportDate}T00:00:00Z`)
+      )
+    : "";
+
   // ---- Auto-save draft (debounced) ----
   useEffect(() => {
     if (firstRender.current) {
@@ -134,7 +141,12 @@ export function ReportForm({
           <Field label="اسم الفوج">
             <Input value={groupName} disabled readOnly />
           </Field>
-          <Field label="التاريخ" htmlFor="reportDate" error={fe.reportDate?.[0]}>
+          <Field
+            label="التاريخ"
+            htmlFor="reportDate"
+            error={fe.reportDate?.[0]}
+            hint={weekday ? `اليوم: ${weekday}` : undefined}
+          >
             <Input
               id="reportDate"
               name="reportDate"

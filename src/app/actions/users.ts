@@ -8,7 +8,9 @@ import {
   updateUserSchema,
   changePasswordSchema,
   renameGroupSchema,
+  createGroupSchema,
 } from "@/lib/validations";
+import { Role } from "@prisma/client";
 
 export type ActionState = {
   success?: string;
@@ -103,4 +105,49 @@ export async function renameGroupAction(
   await prisma.scoutGroup.update({ where: { id: groupId }, data: { name } });
   revalidatePath("/admin/users");
   return { success: "تم تحديث اسم الفوج" };
+}
+
+/** Create a new scout group together with its login user. */
+export async function createGroupAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  await requireAdminUser();
+
+  const parsed = createGroupSchema.safeParse({
+    name: formData.get("name"),
+    username: formData.get("username"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { fieldErrors: parsed.error.flatten().fieldErrors, error: "يرجى تصحيح الأخطاء" };
+  }
+  const { name, username, password } = parsed.data;
+
+  const [groupClash, userClash] = await Promise.all([
+    prisma.scoutGroup.findUnique({ where: { name }, select: { id: true } }),
+    prisma.user.findUnique({ where: { username }, select: { id: true } }),
+  ]);
+  if (groupClash) return { error: "اسم الفوج مستخدم بالفعل" };
+  if (userClash) return { error: "اسم المستخدم مستخدم بالفعل" };
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  // Create the group and its GROUP user atomically.
+  await prisma.scoutGroup.create({
+    data: {
+      name,
+      users: {
+        create: {
+          name,
+          username,
+          passwordHash,
+          role: Role.GROUP,
+        },
+      },
+    },
+  });
+
+  revalidatePath("/admin/users");
+  return { success: `تم إنشاء فوج "${name}" وحساب الدخول الخاص به` };
 }
