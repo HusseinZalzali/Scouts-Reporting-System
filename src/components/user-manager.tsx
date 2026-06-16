@@ -2,11 +2,12 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { KeyRound, Pencil, Save, Tent, ShieldCheck } from "lucide-react";
+import { KeyRound, Pencil, Save, Tent, ShieldCheck, Trash2 } from "lucide-react";
 import {
   updateUserAction,
   changePasswordAction,
   renameGroupAction,
+  deleteGroupAction,
   type ActionState,
 } from "@/app/actions/users";
 import { Alert, Badge, Button, Card, Field, Input } from "@/components/ui";
@@ -110,20 +111,48 @@ function UserCard({ user }: { user: UserRow }) {
       )}
 
       {tab === "group" && user.scoutGroup && (
-        <form action={groupAction} className="space-y-3">
-          <input type="hidden" name="groupId" value={user.scoutGroup.id} />
-          {groupState.error && <Alert tone="error">{groupState.error}</Alert>}
-          {groupState.success && <Alert tone="success">{groupState.success}</Alert>}
-          <Field label="اسم الفوج" error={groupState.fieldErrors?.name?.[0]}>
-            <Input name="name" defaultValue={user.scoutGroup.name} required />
-          </Field>
-          <div className="flex justify-end">
-            <SubmitButton>
-              <Save className="h-4 w-4" />
-              حفظ
-            </SubmitButton>
+        <div className="space-y-3">
+          <form action={groupAction} className="space-y-3">
+            <input type="hidden" name="groupId" value={user.scoutGroup.id} />
+            {groupState.error && <Alert tone="error">{groupState.error}</Alert>}
+            {groupState.success && <Alert tone="success">{groupState.success}</Alert>}
+            <Field label="اسم الفوج" error={groupState.fieldErrors?.name?.[0]}>
+              <Input name="name" defaultValue={user.scoutGroup.name} required />
+            </Field>
+            <div className="flex justify-end">
+              <SubmitButton>
+                <Save className="h-4 w-4" />
+                حفظ
+              </SubmitButton>
+            </div>
+          </form>
+
+          {/* Danger zone: delete the whole group */}
+          <div className="rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/30">
+            <p className="mb-2 text-xs text-red-700 dark:text-red-300">
+              حذف الفوج يحذف نهائياً حساب الدخول وجميع تقاريره. لا يمكن التراجع.
+            </p>
+            <form action={deleteGroupAction}>
+              <input type="hidden" name="groupId" value={user.scoutGroup.id} />
+              <button
+                type="submit"
+                onClick={(e) => {
+                  if (
+                    !confirm(
+                      `هل أنت متأكد من حذف فوج "${user.scoutGroup?.name}"؟ سيتم حذف حساب الدخول وكل التقارير نهائياً.`
+                    )
+                  ) {
+                    e.preventDefault();
+                  }
+                }}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+                حذف الفوج نهائياً
+              </button>
+            </form>
           </div>
-        </form>
+        </div>
       )}
     </Card>
   );

@@ -107,6 +107,32 @@ export async function renameGroupAction(
   return { success: "تم تحديث اسم الفوج" };
 }
 
+/**
+ * Delete a scout group entirely: its login users, all its daily reports
+ * (and program items cascade via the schema), then the group itself.
+ */
+export async function deleteGroupAction(formData: FormData) {
+  await requireAdminUser();
+  const groupId = String(formData.get("groupId"));
+
+  const group = await prisma.scoutGroup.findUnique({
+    where: { id: groupId },
+    select: { id: true },
+  });
+  if (!group) throw new Error("الفوج غير موجود");
+
+  await prisma.$transaction([
+    // Group users have onDelete: SetNull, so remove them explicitly.
+    prisma.user.deleteMany({ where: { scoutGroupId: groupId, role: Role.GROUP } }),
+    // Reports + program items cascade when the group is deleted.
+    prisma.scoutGroup.delete({ where: { id: groupId } }),
+  ]);
+
+  revalidatePath("/admin/users");
+  revalidatePath("/admin/reports");
+  revalidatePath("/admin");
+}
+
 /** Create a new scout group together with its login user. */
 export async function createGroupAction(
   _prev: ActionState,
