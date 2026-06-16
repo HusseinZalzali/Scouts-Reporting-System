@@ -32,6 +32,44 @@ function SubmitButton() {
   );
 }
 
+/**
+ * Attendance count input tuned for mobile: shows an empty box (with a 0
+ * placeholder) instead of a literal "0", and selects existing text on focus
+ * so you can type the number directly without first deleting the zero.
+ */
+function CountField({
+  label,
+  name,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  name: string;
+  value: number;
+  onChange: (n: number) => void;
+  error?: string;
+}) {
+  return (
+    <Field label={label} htmlFor={name} error={error}>
+      <Input
+        id={name}
+        name={name}
+        type="number"
+        inputMode="numeric"
+        min={0}
+        placeholder="0"
+        value={value === 0 ? "" : value}
+        onFocus={(e) => e.currentTarget.select()}
+        onChange={(e) => {
+          const v = e.target.value;
+          onChange(v === "" ? 0 : Math.max(0, Number(v) || 0));
+        }}
+      />
+    </Field>
+  );
+}
+
 export function ReportForm({
   groupName,
   initial,
@@ -63,6 +101,9 @@ export function ReportForm({
   const [draftState, setDraftState] = useState<"idle" | "saving" | "saved">("idle");
   const [, startTransition] = useTransition();
   const firstRender = useRef(true);
+  // Once the user submits, stop auto-saving drafts so a late draft write can't
+  // race the submit and flip the report back to مسودة.
+  const submitting = useRef(false);
   const total = baraem + ashbal + kashafa + jawala + qada;
 
   // Arabic weekday name for the selected date (e.g. "الأحد").
@@ -78,7 +119,7 @@ export function ReportForm({
       firstRender.current = false;
       return;
     }
-    if (locked) return;
+    if (locked || submitting.current) return;
 
     const handle = setTimeout(() => {
       const fd = new FormData();
@@ -115,7 +156,13 @@ export function ReportForm({
   const fe = state.fieldErrors ?? {};
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form
+      action={formAction}
+      onSubmit={() => {
+        submitting.current = true;
+      }}
+      className="space-y-6"
+    >
       {initial?.id && <input type="hidden" name="reportId" value={initial.id} />}
 
       {state.error && <Alert tone="error">{state.error}</Alert>}
@@ -215,26 +262,11 @@ export function ReportForm({
           </span>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          <Field label="براعم" htmlFor="attendanceBaraem" error={fe.attendanceBaraem?.[0]}>
-            <Input id="attendanceBaraem" name="attendanceBaraem" type="number" min={0}
-              value={baraem} onChange={(e) => setBaraem(Number(e.target.value) || 0)} />
-          </Field>
-          <Field label="أشبال" htmlFor="attendanceAshbal" error={fe.attendanceAshbal?.[0]}>
-            <Input id="attendanceAshbal" name="attendanceAshbal" type="number" min={0}
-              value={ashbal} onChange={(e) => setAshbal(Number(e.target.value) || 0)} />
-          </Field>
-          <Field label="كشافة" htmlFor="attendanceKashafa" error={fe.attendanceKashafa?.[0]}>
-            <Input id="attendanceKashafa" name="attendanceKashafa" type="number" min={0}
-              value={kashafa} onChange={(e) => setKashafa(Number(e.target.value) || 0)} />
-          </Field>
-          <Field label="جوالة" htmlFor="attendanceJawala" error={fe.attendanceJawala?.[0]}>
-            <Input id="attendanceJawala" name="attendanceJawala" type="number" min={0}
-              value={jawala} onChange={(e) => setJawala(Number(e.target.value) || 0)} />
-          </Field>
-          <Field label="قادة" htmlFor="attendanceQada" error={fe.attendanceQada?.[0]}>
-            <Input id="attendanceQada" name="attendanceQada" type="number" min={0}
-              value={qada} onChange={(e) => setQada(Number(e.target.value) || 0)} />
-          </Field>
+          <CountField label="براعم" name="attendanceBaraem" value={baraem} onChange={setBaraem} error={fe.attendanceBaraem?.[0]} />
+          <CountField label="أشبال" name="attendanceAshbal" value={ashbal} onChange={setAshbal} error={fe.attendanceAshbal?.[0]} />
+          <CountField label="كشافة" name="attendanceKashafa" value={kashafa} onChange={setKashafa} error={fe.attendanceKashafa?.[0]} />
+          <CountField label="جوالة" name="attendanceJawala" value={jawala} onChange={setJawala} error={fe.attendanceJawala?.[0]} />
+          <CountField label="قادة" name="attendanceQada" value={qada} onChange={setQada} error={fe.attendanceQada?.[0]} />
         </div>
       </Card>
 

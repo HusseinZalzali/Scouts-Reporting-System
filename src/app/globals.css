@@ -17,6 +17,16 @@
     direction: ltr;
     text-align: right;
   }
+  /* Date inputs are inherently LTR. In RTL the native calendar indicator can
+     overlap the date text on mobile — force LTR and give the indicator room. */
+  input[type="date"] {
+    direction: ltr;
+    text-align: right;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-inline-start: 0.25rem;
+    margin-inline-end: 0;
+  }
 }
 
 @layer utilities {

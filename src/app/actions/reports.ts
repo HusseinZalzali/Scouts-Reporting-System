@@ -114,6 +114,7 @@ export async function submitReportAction(
 
   revalidatePath("/reports");
   revalidatePath("/dashboard");
+  revalidatePath(`/reports/${reportId}`);
   redirect(`/reports/${reportId}?saved=1`);
 }
 
@@ -210,4 +211,24 @@ export async function deleteReportAction(formData: FormData) {
   revalidatePath("/reports");
   revalidatePath("/dashboard");
   redirect("/reports");
+}
+
+/** Admin can delete any report (program items cascade). */
+export async function adminDeleteReportAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    throw new Error("هذا الإجراء متاح للمدير فقط");
+  }
+  const id = String(formData.get("id"));
+
+  const report = await prisma.dailyReport.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+  if (!report) throw new Error("التقرير غير موجود");
+
+  await prisma.dailyReport.delete({ where: { id } });
+  revalidatePath("/admin/reports");
+  revalidatePath("/admin");
+  redirect("/admin/reports");
 }

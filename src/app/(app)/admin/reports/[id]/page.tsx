@@ -6,6 +6,7 @@ import { getReportById } from "@/lib/queries";
 import { PageHeader } from "@/components/dashboard-shell";
 import { ReportDetail } from "@/components/report-detail";
 import { Button } from "@/components/ui";
+import { DeleteReportButton } from "@/components/delete-report-button";
 
 export const metadata = { title: "تفاصيل التقرير" };
 
@@ -25,12 +26,15 @@ export default async function AdminReportViewPage({
       <PageHeader
         title="تفاصيل التقرير"
         action={
-          <Link href={`/print/reports/${report.id}`} target="_blank">
-            <Button variant="secondary" size="sm">
-              <Printer className="h-4 w-4" />
-              طباعة
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href={`/print/reports/${report.id}`} target="_blank">
+              <Button variant="secondary" size="sm">
+                <Printer className="h-4 w-4" />
+                طباعة
+              </Button>
+            </Link>
+            <DeleteReportButton id={report.id} />
+          </div>
         }
       />
       <ReportDetail report={report} />

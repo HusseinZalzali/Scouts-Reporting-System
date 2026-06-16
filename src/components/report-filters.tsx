@@ -7,14 +7,17 @@ import { Button, Card, Field, Input } from "@/components/ui";
 
 export function ReportFilters({
   groups,
+  initial,
 }: {
   groups: { id: string; name: string }[];
+  /** Effective default values (e.g. today) reflected in the date inputs. */
+  initial?: { from?: string; to?: string };
 }) {
   const router = useRouter();
   const params = useSearchParams();
 
-  const [from, setFrom] = useState(params.get("from") ?? "");
-  const [to, setTo] = useState(params.get("to") ?? "");
+  const [from, setFrom] = useState(params.get("from") ?? initial?.from ?? "");
+  const [to, setTo] = useState(params.get("to") ?? initial?.to ?? "");
   const [groupId, setGroupId] = useState(params.get("groupId") ?? "");
   const [location, setLocation] = useState(params.get("location") ?? "");
   const [q, setQ] = useState(params.get("q") ?? "");
