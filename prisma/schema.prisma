@@ -1,0 +1,98 @@
+// Prisma schema for Scout Daily Reporting System
+// Database: PostgreSQL (Supabase / Neon)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  GROUP
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(GROUP)
+
+  // A GROUP user belongs to exactly one ScoutGroup. ADMIN users have none.
+  scoutGroupId String?  @map("scout_group_id")
+  scoutGroup   ScoutGroup? @relation(fields: [scoutGroupId], references: [id], onDelete: SetNull)
+
+  reports      DailyReport[] @relation("SubmittedReports")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([scoutGroupId])
+  @@map("users")
+}
+
+model ScoutGroup {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  users     User[]
+  reports   DailyReport[]
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  @@map("scout_groups")
+}
+
+model DailyReport {
+  id           String   @id @default(cuid())
+
+  scoutGroupId String   @map("scout_group_id")
+  scoutGroup   ScoutGroup @relation(fields: [scoutGroupId], references: [id], onDelete: Cascade)
+
+  reportDate   DateTime @map("report_date") @db.Date
+  location     String
+
+  // Program items stored relationally for flexibility.
+  programItems ProgramItem[]
+
+  attendanceBaraem  Int @default(0) @map("attendance_baraem")
+  attendanceAshbal  Int @default(0) @map("attendance_ashbal")
+  attendanceKashafa Int @default(0) @map("attendance_kashafa")
+  attendanceJawala  Int @default(0) @map("attendance_jawala")
+  attendanceQada    Int @default(0) @map("attendance_qada")
+
+  // Draft vs final submission.
+  status       ReportStatus @default(DRAFT)
+
+  submittedById String?  @map("submitted_by")
+  submittedBy   User?    @relation("SubmittedReports", fields: [submittedById], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // One report per group per day.
+  @@unique([scoutGroupId, reportDate])
+  @@index([reportDate])
+  @@index([scoutGroupId])
+  @@map("daily_reports")
+}
+
+model ProgramItem {
+  id        String      @id @default(cuid())
+  reportId  String      @map("report_id")
+  report    DailyReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  order     Int
+  text      String
+
+  @@index([reportId])
+  @@map("program_items")
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+}
