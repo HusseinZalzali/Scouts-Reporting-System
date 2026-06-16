@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { X, FileSpreadsheet, FileText } from "lucide-react";
 import { Button, Card, Field, Input } from "@/components/ui";
+import { DateField } from "@/components/date-field";
 
 export function ReportFilters({
   groups,
@@ -62,11 +63,11 @@ export function ReportFilters({
     <Card className="mb-6">
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field label="من تاريخ" htmlFor="from">
-            <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          <Field label="من تاريخ">
+            <DateField name="from" value={from} onChange={setFrom} />
           </Field>
-          <Field label="إلى تاريخ" htmlFor="to">
-            <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          <Field label="إلى تاريخ">
+            <DateField name="to" value={to} onChange={setTo} />
           </Field>
           <Field label="الفوج" htmlFor="groupId">
             <select

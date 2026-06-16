@@ -3,7 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { Button, Card, Field, Input } from "@/components/ui";
+import { Button, Card, Field } from "@/components/ui";
+import { DateField } from "@/components/date-field";
 
 export function AnalyticsFilters({
   groups,
@@ -42,11 +43,11 @@ export function AnalyticsFilters({
     <Card className="mb-6">
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="من تاريخ" htmlFor="from">
-            <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          <Field label="من تاريخ">
+            <DateField name="from" value={from} onChange={setFrom} />
           </Field>
-          <Field label="إلى تاريخ" htmlFor="to">
-            <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          <Field label="إلى تاريخ">
+            <DateField name="to" value={to} onChange={setTo} />
           </Field>
           <Field label="الفوج" htmlFor="groupId">
             <select id="groupId" value={groupId} onChange={(e) => setGroupId(e.target.value)} className="input-base">
