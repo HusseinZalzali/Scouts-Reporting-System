@@ -26,6 +26,7 @@ export function AttendanceOverTimeChart({
     return <EmptyState title="لا توجد بيانات" description="لا توجد تقارير في النطاق المحدد" icon={<BarChart3 className="h-10 w-10" />} />;
   }
   return (
+    <div className="min-w-0">
     <ResponsiveContainer width="100%" height={320}>
       <LineChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
@@ -46,6 +47,7 @@ export function AttendanceOverTimeChart({
         />
       </LineChart>
     </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -58,6 +60,7 @@ export function AttendanceByGroupChart({
     return <EmptyState title="لا توجد بيانات" description="لا توجد تقارير في النطاق المحدد" icon={<BarChart3 className="h-10 w-10" />} />;
   }
   return (
+    <div className="min-w-0">
     <ResponsiveContainer width="100%" height={320}>
       <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
@@ -71,5 +74,6 @@ export function AttendanceByGroupChart({
         <Bar dataKey="total" name="إجمالي الحضور" fill={BRAND} radius={[8, 8, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
+    </div>
   );
 }

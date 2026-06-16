@@ -19,15 +19,20 @@ export function StatCard({
     violet: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
   };
   return (
-    <Card className="flex items-center justify-between">
-      <div>
-        <p className="text-sm text-gray-500">{label}</p>
-        <p className="mt-1 text-2xl font-bold">
+    <Card className="flex items-center justify-between gap-2 p-4 sm:p-5">
+      <div className="min-w-0">
+        <p className="truncate text-xs text-gray-500 sm:text-sm">{label}</p>
+        <p className="mt-1 text-xl font-bold sm:text-2xl">
           {typeof value === "number" ? toArabicDigits(value) : value}
         </p>
       </div>
       {icon && (
-        <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl", tones[tone])}>
+        <div
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12",
+            tones[tone]
+          )}
+        >
           {icon}
         </div>
       )}
