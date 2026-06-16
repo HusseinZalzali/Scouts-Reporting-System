@@ -12,29 +12,41 @@
   body {
     @apply bg-gray-50 text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100;
   }
-  /* RTL-aware number inputs */
-  input[type="number"] {
-    direction: ltr;
-    text-align: right;
-  }
-  /* Date inputs are inherently LTR. In RTL the native calendar indicator can
-     overlap the date text on mobile — force LTR and give the indicator room. */
-  input[type="date"] {
-    direction: ltr;
-    text-align: right;
-  }
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    margin-inline-start: 0.25rem;
-    margin-inline-end: 0;
-  }
-  /* iOS Safari auto-zooms when focusing an input whose font-size is < 16px.
-     Force 16px on mobile so focusing a field never zooms the page. */
-  @media (max-width: 767px) {
-    input,
-    select,
-    textarea {
-      font-size: 16px;
-    }
+}
+
+/* ----------------------------------------------------------------------------
+   Input behavior — kept OUTSIDE @layer so it wins over the .input-base utility
+   (Tailwind utilities always beat @layer base). Uses !important for the rules
+   that must not be overridden by utility classes like `text-sm`.
+---------------------------------------------------------------------------- */
+
+/* Number inputs: LTR, right-aligned. */
+input[type="number"] {
+  direction: ltr;
+  text-align: right;
+}
+
+/* Date inputs: LTR and right-aligned so the value sits at the field edge and
+   the native calendar indicator doesn't float/overlap in the RTL layout. */
+input[type="date"] {
+  direction: ltr;
+  text-align: right !important;
+}
+input[type="date"]::-webkit-datetime-edit {
+  text-align: right;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  margin-inline-start: 0.25rem;
+  margin-inline-end: 0;
+}
+
+/* iOS Safari auto-zooms when focusing an input whose font-size is < 16px.
+   Force 16px on mobile (overriding text-sm) so focusing never zooms the page. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }
 

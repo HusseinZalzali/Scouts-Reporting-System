@@ -115,7 +115,7 @@ export async function submitReportAction(
   revalidatePath("/reports");
   revalidatePath("/dashboard");
   revalidatePath(`/reports/${reportId}`);
-  redirect(`/reports/${reportId}?saved=1`);
+  redirect("/reports?submitted=1");
 }
 
 /**

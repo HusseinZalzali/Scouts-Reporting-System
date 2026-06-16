@@ -4,12 +4,17 @@ import { requireGroup } from "@/lib/session";
 import { getGroupReports } from "@/lib/queries";
 import { PageHeader } from "@/components/dashboard-shell";
 import { ReportTable } from "@/components/report-table";
-import { Button } from "@/components/ui";
+import { Button, Alert } from "@/components/ui";
 
 export const metadata = { title: "تقاريري" };
 
-export default async function ReportsPage() {
+export default async function ReportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ submitted?: string }>;
+}) {
   const user = await requireGroup();
+  const { submitted } = await searchParams;
   const reports = await getGroupReports(user.scoutGroupId);
 
   return (
@@ -26,6 +31,11 @@ export default async function ReportsPage() {
           </Link>
         }
       />
+      {submitted === "1" && (
+        <div className="mb-4">
+          <Alert tone="success">تم تقديم التقرير بنجاح.</Alert>
+        </div>
+      )}
       <ReportTable rows={reports} />
     </>
   );
